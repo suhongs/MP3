@@ -49,6 +49,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         super.onDestroy();
     }
 
+    boolean next;
     // 액티비티에서 데이터 받음
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -57,6 +58,8 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
         isPlaying = Objects.requireNonNull(intent.getExtras()).getBoolean("playing");
         position = intent.getExtras().getInt("position");
+        if (intent.getExtras().getBoolean("next"))
+            currentPosition = 0;
         if(isPlaying){
             Log.i("테스트","음악 실행");
             playMusic(list.get(position));
