@@ -32,7 +32,7 @@ import java.util.List;
 
 public class MainActivity extends Activity{
 
-    String[] permissions = { "android.permission.READ_EXTERNAL_STORAGE"};
+    String[] permissions = { "android.permission.READ_EXTERNAL_STORAGE","android.permission.FOREGROUND_SERVICE"};
     private String TAG = "MainActivity";
     private ListView musicListView;
     private MusicAdapter adapter;
