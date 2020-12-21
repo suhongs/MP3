@@ -1,0 +1,139 @@
+package com.example.hw3;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+
+public class PlayMusicActivity extends AppCompatActivity {
+    private static final String ACTION_PLAY = "PLAY";
+    private static final String ACTION_PAUSE = "PAUSE";
+    private boolean isPlaying = true;
+
+    private Intent musicIntent;
+    private ArrayList<MusicData> list;
+    private Messenger mServiceMessenger = null;
+    private boolean mIsBound;
+
+    private ImageView skipPreviousBtn, playBtn, skipNextBtn;
+    private ProgressBar musicProgressBar;
+    private TextView musicTitle, musicPlayingText, musicFinishText;
+
+    private int duration, currentPosition;
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            duration = intent.getExtras().getInt("duration");
+            currentPosition = intent.getExtras().getInt("currentPosition");
+            Log.i("테스트","전체 길이 : " + duration);
+            musicFinishText.setText(duration+"");
+//
+//            Thread thread = new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    try {
+//                        while(isPlaying) { // 재생 중이면 동작?
+//                            Thread.sleep(1);
+//                            int time = currentPosition ;
+//                            Log.i("테스트", "재생 길이 : " + time);
+//                            musicPlayingText.setText(String.valueOf(time));
+//                            progressUpdate(duration, currentPosition);
+//                        }
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            });
+//            thread.start();
+
+        }
+    };
+    private void init(){
+        musicTitle = findViewById(R.id.music_title);
+        playBtn = findViewById(R.id.play_btn);
+        musicPlayingText = findViewById(R.id.music_playing_text);
+        musicFinishText = findViewById(R.id.music_finish_text);
+        musicProgressBar = findViewById(R.id.music_progressBar);
+//        progressUpdate("","");
+    }
+
+    private void progressUpdate(int duration, int currentPosition){
+        musicProgressBar.setVisibility(ProgressBar.VISIBLE);
+        musicProgressBar.setMax(duration);
+//        musicProgressBar.setOn
+        musicProgressBar.setProgress(currentPosition);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // action 이름이 "custom-event-name"으로 정의된 intent를 수신하게 된다.
+        // observer의 이름은 mMessageReceiver이다.
+        LocalBroadcastManager.getInstance(this).registerReceiver( mMessageReceiver, new IntentFilter("custom-event-name"));
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_play_music);
+        init(); // 위젯 초기화
+        Intent intent = getIntent();
+        list = (ArrayList<MusicData>) intent.getSerializableExtra("playlist");
+
+        musicTitle.setText(list.get(0).getTitle());
+        Log.i("PlayMusicActivity 테스트", list.toString());
+
+        musicIntent = new Intent(this, MusicService.class);
+        musicIntent.putExtra("playlist", list);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver( mMessageReceiver);
+    }
+
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.play_btn:
+                if(isPlaying) { // 음악 재생
+//                    musicIntent.putExtra("position",);
+                    musicIntent.putExtra("playing",true);
+                    // 이미지 변경
+                    playBtn.setImageResource(R.drawable.ic_baseline_pause_24);
+                    isPlaying = false;
+                }else{ // 일시 정지
+                    musicIntent.putExtra("playing",false);
+//                    startService(musicIntent);
+
+                    // 이미지 변경
+                    playBtn.setImageResource(R.drawable.ic_baseline_play_arrow_24);
+                    isPlaying = true;
+                }
+                startService(musicIntent);
+
+//            case R.id.skip_next_btn:
+
+        }
+    }
+}

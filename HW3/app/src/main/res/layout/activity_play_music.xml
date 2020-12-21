@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PlayMusicActivity">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/music_image"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:background="@color/colorAccent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/music_title"/>
+
+    <TextView
+        android:id="@+id/music_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="music_title"
+        android:textSize="50dp"
+        app:layout_constraintTop_toTopOf="@+id/music_image"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/music_control_layout"
+        />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/music_control_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="136dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/music_title"
+        app:layout_constraintBottom_toTopOf="@+id/music_time_container">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/skip_previous_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_skip_previous_24"
+            android:onClick="onClick"
+            app:layout_constraintLeft_toLeftOf="@+id/music_control_layout"
+            app:layout_constraintTop_toTopOf="@+id/music_control_layout"
+            app:layout_constraintBottom_toBottomOf="@+id/music_control_layout"
+            app:layout_constraintRight_toLeftOf="@+id/play_btn"/>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/play_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_play_arrow_24"
+            android:onClick="onClick"
+            app:layout_constraintTop_toTopOf="@+id/music_control_layout"
+            app:layout_constraintBottom_toBottomOf="@+id/music_control_layout"
+            app:layout_constraintLeft_toRightOf="@+id/skip_previous_btn"
+            app:layout_constraintRight_toLeftOf="@+id/skip_next_btn"
+            />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/skip_next_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_skip_next_24"
+            android:onClick="onClick"
+            app:layout_constraintTop_toTopOf="@+id/music_control_layout"
+            app:layout_constraintBottom_toBottomOf="@+id/music_control_layout"
+            app:layout_constraintRight_toRightOf="@+id/music_control_layout"
+            app:layout_constraintLeft_toRightOf="@+id/play_btn"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/music_time_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/music_control_layout"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+        <androidx.core.widget.ContentLoadingProgressBar
+            android:id="@+id/music_progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            app:layout_constraintLeft_toLeftOf="@+id/music_time_container"
+            app:layout_constraintRight_toRightOf="@+id/music_time_container"
+            app:layout_constraintTop_toTopOf="@+id/music_time_container"
+            app:layout_constraintBottom_toTopOf="@+id/temp"/>
+        <TextView
+            android:id="@+id/music_playing_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="04 : 00"
+            android:textSize="20dp"
+            app:layout_constraintRight_toLeftOf="@+id/temp"
+            app:layout_constraintLeft_toLeftOf="@+id/music_time_container"
+            app:layout_constraintTop_toBottomOf="@+id/music_progressBar"
+            app:layout_constraintBottom_toBottomOf="@+id/music_time_container"/>
+        <TextView
+            android:id="@+id/temp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="/"
+            android:textSize="20dp"
+            app:layout_constraintLeft_toRightOf="@+id/music_playing_text"
+            app:layout_constraintRight_toLeftOf="@+id/music_finish_text"
+            app:layout_constraintTop_toBottomOf="@+id/music_progressBar"
+            app:layout_constraintBottom_toBottomOf="@+id/music_time_container"/>
+        <TextView
+            android:id="@+id/music_finish_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="04 : 00"
+            android:textSize="20dp"
+            app:layout_constraintLeft_toRightOf="@+id/temp"
+            app:layout_constraintRight_toRightOf="@+id/music_time_container"
+            app:layout_constraintTop_toBottomOf="@+id/music_progressBar"
+            app:layout_constraintBottom_toBottomOf="@+id/music_time_container"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
