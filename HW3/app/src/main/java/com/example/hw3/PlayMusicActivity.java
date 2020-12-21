@@ -44,8 +44,8 @@ public class PlayMusicActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             duration = intent.getExtras().getInt("duration");
             currentPosition = intent.getExtras().getInt("currentPosition");
-            Log.i("테스트","전체 길이 : " + duration);
-            musicFinishText.setText(duration+"");
+            Log.i("테스트", "전체 길이 : " + duration);
+            musicFinishText.setText(duration + "");
 //
 //            Thread thread = new Thread(new Runnable() {
 //                @Override
@@ -67,7 +67,8 @@ public class PlayMusicActivity extends AppCompatActivity {
 
         }
     };
-    private void init(){
+
+    private void init() {
         musicTitle = findViewById(R.id.music_title);
         playBtn = findViewById(R.id.play_btn);
         musicPlayingText = findViewById(R.id.music_playing_text);
@@ -76,7 +77,7 @@ public class PlayMusicActivity extends AppCompatActivity {
 //        progressUpdate("","");
     }
 
-    private void progressUpdate(int duration, int currentPosition){
+    private void progressUpdate(int duration, int currentPosition) {
         musicProgressBar.setVisibility(ProgressBar.VISIBLE);
         musicProgressBar.setMax(duration);
 //        musicProgressBar.setOn
@@ -89,7 +90,7 @@ public class PlayMusicActivity extends AppCompatActivity {
         super.onResume();
         // action 이름이 "custom-event-name"으로 정의된 intent를 수신하게 된다.
         // observer의 이름은 mMessageReceiver이다.
-        LocalBroadcastManager.getInstance(this).registerReceiver( mMessageReceiver, new IntentFilter("custom-event-name"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("custom-event-name"));
     }
 
     @Override
@@ -101,31 +102,35 @@ public class PlayMusicActivity extends AppCompatActivity {
         list = (ArrayList<MusicData>) intent.getSerializableExtra("playlist");
         position = intent.getExtras().getInt("position");
 
-        musicTitle.setText(URLDecoder.decode(list.get(position).getTitle()));
+        updateUI(position);
         Log.i("PlayMusicActivity 테스트", list.toString());
 
         musicIntent = new Intent(this, MusicService.class);
         musicIntent.putExtra("playlist", list);
-        musicIntent.putExtra("position",position);
+        musicIntent.putExtra("position", position);
+
+//        getSupportActionBar().setIcon(R.drawable.ic_baseline_play_arrow_24);
+//        getSupportActionBar().setDisplayUseLogoEnabled(true);
+//        getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver( mMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.play_btn:
-                if(isPlaying) { // 음악 재생
+                if (isPlaying) { // 음악 재생
 //                    musicIntent.putExtra("position",);
-                    musicIntent.putExtra("playing",true);
+                    musicIntent.putExtra("playing", true);
                     // 이미지 변경
                     playBtn.setImageResource(R.drawable.ic_baseline_pause_24);
                     isPlaying = false;
-                }else{ // 일시 정지
-                    musicIntent.putExtra("playing",false);
+                } else { // 일시 정지
+                    musicIntent.putExtra("playing", false);
 //                    startService(musicIntent);
 
                     // 이미지 변경
@@ -133,9 +138,47 @@ public class PlayMusicActivity extends AppCompatActivity {
                     isPlaying = true;
                 }
                 startService(musicIntent);
+                break;
 
-//            case R.id.skip_next_btn:
+            case R.id.skip_next_btn:
+                playBtn.setImageResource(R.drawable.ic_baseline_play_arrow_24);
+                isPlaying = true;
+                musicIntent.putExtra("playing", false);
+                musicIntent.putExtra("stop",true);
+                startService(musicIntent);
+                try {
+                    Thread.sleep(2000);
+                    if (isPlaying) { // 음악 재생
+//                    musicIntent.putExtra("position",);
+                        musicIntent.putExtra("playing", true);
+                        musicIntent.putExtra("stop",false);
+                        // 이미지 변경
+                        playBtn.setImageResource(R.drawable.ic_baseline_pause_24);
+                        isPlaying = false;
+                    } else { // 일시 정지
+                        musicIntent.putExtra("playing", false);
+//                    startService(musicIntent);
 
+                        // 이미지 변경
+                        playBtn.setImageResource(R.drawable.ic_baseline_play_arrow_24);
+                        isPlaying = true;
+                    }
+
+
+                    updateUI(position + 1);
+                    startService(musicIntent);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+
+
+                break;
         }
+    }
+
+    public void updateUI(int position) {
+        Log.i("위치", position + "");
+        musicTitle.setText(URLDecoder.decode(list.get(position).getTitle()));
     }
 }
