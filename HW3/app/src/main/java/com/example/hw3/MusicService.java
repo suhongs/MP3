@@ -98,6 +98,20 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         intent.putExtra("currentPosition", currentPosition);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    while(isPlaying) {
+                        intent.putExtra("currentPosition", mediaPlayer.getCurrentPosition());
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                        Thread.sleep(1000);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     private MusicData musicData;

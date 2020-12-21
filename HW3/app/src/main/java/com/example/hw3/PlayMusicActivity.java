@@ -45,29 +45,16 @@ public class PlayMusicActivity extends AppCompatActivity {
             duration = intent.getExtras().getInt("duration");
             currentPosition = intent.getExtras().getInt("currentPosition");
             Log.i("테스트","전체 길이 : " + duration);
-            musicFinishText.setText(Integer.toString(duration/1000/60)+":"+String.format("%02d", duration/1000&60));
-//
-//            Thread thread = new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    try {
-//                        while(isPlaying) { // 재생 중이면 동작?
-//                            Thread.sleep(1);
-//                            int time = currentPosition ;
-//                            Log.i("테스트", "재생 길이 : " + time);
-//                            musicPlayingText.setText(String.valueOf(time));
-//                            progressUpdate(duration, currentPosition);
-//                        }
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            });
-//            thread.start();
+            musicFinishText.setText(Integer.toString(duration/1000/60)+":"+String.format("%02d", duration/1000%60));
+
+            Log.i("테스트", "재생 길이 : " + currentPosition);
+            musicPlayingText.setText(Integer.toString(currentPosition/1000/60)+":"+String.format("%02d", currentPosition/1000%60));
+            progressUpdate(duration, currentPosition);
 
         }
     };
-    private void init(){
+
+    private void init() {
         musicTitle = findViewById(R.id.music_title);
         playBtn = findViewById(R.id.play_btn);
         musicPlayingText = findViewById(R.id.music_playing_text);
@@ -76,7 +63,7 @@ public class PlayMusicActivity extends AppCompatActivity {
 //        progressUpdate("","");
     }
 
-    private void progressUpdate(int duration, int currentPosition){
+    private void progressUpdate(int duration, int currentPosition) {
         musicProgressBar.setVisibility(ProgressBar.VISIBLE);
         musicProgressBar.setMax(duration);
 //        musicProgressBar.setOn
@@ -89,7 +76,7 @@ public class PlayMusicActivity extends AppCompatActivity {
         super.onResume();
         // action 이름이 "custom-event-name"으로 정의된 intent를 수신하게 된다.
         // observer의 이름은 mMessageReceiver이다.
-        LocalBroadcastManager.getInstance(this).registerReceiver( mMessageReceiver, new IntentFilter("custom-event-name"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("custom-event-name"));
     }
 
     @Override
@@ -106,19 +93,23 @@ public class PlayMusicActivity extends AppCompatActivity {
 
         musicIntent = new Intent(this, MusicService.class);
         musicIntent.putExtra("playlist", list);
-        musicIntent.putExtra("position",position);
+        musicIntent.putExtra("position", position);
+
+//        getSupportActionBar().setIcon(R.drawable.ic_baseline_play_arrow_24);
+//        getSupportActionBar().setDisplayUseLogoEnabled(true);
+//        getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver( mMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
     public void onClick(View v) throws InterruptedException {
         switch (v.getId()) {
             case R.id.play_btn:
-                if(isPlaying) { // 음악 재생
+                if (isPlaying) { // 음악 재생
 //                    musicIntent.putExtra("position",);
                     musicIntent.putExtra("playing",false);
                     // 이미지 변경

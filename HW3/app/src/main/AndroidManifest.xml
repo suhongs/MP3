@@ -17,7 +17,8 @@
         <service
             android:name=".MusicService" />
 
-        <activity android:name=".PlayMusicActivity" />
+        <activity android:name=".PlayMusicActivity"
+            android:icon="@drawable/ic_baseline_play_arrow_24"/>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
