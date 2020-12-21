@@ -28,7 +28,7 @@ import java.util.ArrayList;
 public class PlayMusicActivity extends AppCompatActivity {
     private static final String ACTION_PLAY = "PLAY";
     private static final String ACTION_PAUSE = "PAUSE";
-    private boolean isPlaying = true;
+    private boolean isPlaying = false;
 
     private Intent musicIntent;
     private ArrayList<MusicData> list;
@@ -44,26 +44,12 @@ public class PlayMusicActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             duration = intent.getExtras().getInt("duration");
             currentPosition = intent.getExtras().getInt("currentPosition");
-            Log.i("테스트", "전체 길이 : " + duration);
-            musicFinishText.setText(duration + "");
-//
-//            Thread thread = new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    try {
-//                        while(isPlaying) { // 재생 중이면 동작?
-//                            Thread.sleep(1);
-//                            int time = currentPosition ;
-//                            Log.i("테스트", "재생 길이 : " + time);
-//                            musicPlayingText.setText(String.valueOf(time));
-//                            progressUpdate(duration, currentPosition);
-//                        }
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            });
-//            thread.start();
+            Log.i("테스트","전체 길이 : " + duration);
+            musicFinishText.setText(Integer.toString(duration/1000/60)+":"+String.format("%02d", duration/1000%60));
+
+            Log.i("테스트", "재생 길이 : " + currentPosition);
+            musicPlayingText.setText(Integer.toString(currentPosition/1000/60)+":"+String.format("%02d", currentPosition/1000%60));
+            progressUpdate(duration, currentPosition);
 
         }
     };
@@ -120,65 +106,58 @@ public class PlayMusicActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
-    public void onClick(View v) {
+    public void onClick(View v) throws InterruptedException {
         switch (v.getId()) {
             case R.id.play_btn:
                 if (isPlaying) { // 음악 재생
 //                    musicIntent.putExtra("position",);
-                    musicIntent.putExtra("playing", true);
-                    // 이미지 변경
-                    playBtn.setImageResource(R.drawable.ic_baseline_pause_24);
-                    isPlaying = false;
-                } else { // 일시 정지
-                    musicIntent.putExtra("playing", false);
-//                    startService(musicIntent);
-
+                    musicIntent.putExtra("playing",false);
                     // 이미지 변경
                     playBtn.setImageResource(R.drawable.ic_baseline_play_arrow_24);
-                    isPlaying = true;
-                }
-                startService(musicIntent);
-                break;
-
-            case R.id.skip_next_btn:
-                playBtn.setImageResource(R.drawable.ic_baseline_play_arrow_24);
-                isPlaying = true;
-                musicIntent.putExtra("playing", false);
-                musicIntent.putExtra("stop",true);
-                startService(musicIntent);
-                try {
-                    Thread.sleep(2000);
-                    if (isPlaying) { // 음악 재생
-//                    musicIntent.putExtra("position",);
-                        musicIntent.putExtra("playing", true);
-                        musicIntent.putExtra("stop",false);
-                        // 이미지 변경
-                        playBtn.setImageResource(R.drawable.ic_baseline_pause_24);
-                        isPlaying = false;
-                    } else { // 일시 정지
-                        musicIntent.putExtra("playing", false);
+                    isPlaying = false;
+                }else{ // 일시 정지
+                    musicIntent.putExtra("playing",true);
 //                    startService(musicIntent);
 
-                        // 이미지 변경
-                        playBtn.setImageResource(R.drawable.ic_baseline_play_arrow_24);
-                        isPlaying = true;
-                    }
-
-
-                    updateUI(position + 1);
-                    startService(musicIntent);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    // 이미지 변경
+                    playBtn.setImageResource(R.drawable.ic_baseline_pause_24);
+                    isPlaying = true;
                 }
-
-
-
+                break;
+            case R.id.skip_next_btn:
+                musicIntent.putExtra("next",true);
+                musicIntent.putExtra("playing", false);
+                startService(musicIntent);
+                position+=1;
+                if(position == list.size())
+                    position = 0;
+                musicIntent.putExtra("position", position);
+                musicIntent.putExtra("playing", true);
+                updateUI(position);
+                playBtn.setImageResource(R.drawable.ic_baseline_pause_24);
+                isPlaying = true;
+                break;
+            case R.id.skip_previous_btn:
+                musicIntent.putExtra("next",true);
+                musicIntent.putExtra("playing", false);
+                startService(musicIntent);
+                Log.i("list" , Integer.toString(list.size()));
+                position -= 1;
+                if(position == -1)
+                    position += list.size();
+                musicIntent.putExtra("position", position);
+                musicIntent.putExtra("playing", true);
+                updateUI(position);
+                playBtn.setImageResource(R.drawable.ic_baseline_pause_24);
+                isPlaying = true;
                 break;
         }
+        startService(musicIntent);
+        musicIntent.putExtra("next",false);
     }
 
-    public void updateUI(int position) {
-        Log.i("위치", position + "");
+    public void updateUI(int position){
         musicTitle.setText(URLDecoder.decode(list.get(position).getTitle()));
     }
+
 }

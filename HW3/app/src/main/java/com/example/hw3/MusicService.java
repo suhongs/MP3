@@ -49,7 +49,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         super.onDestroy();
     }
 
-    boolean stop;
+    boolean next;
     // 액티비티에서 데이터 받음
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -58,7 +58,8 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
         isPlaying = Objects.requireNonNull(intent.getExtras()).getBoolean("playing");
         position = intent.getExtras().getInt("position");
-        stop = intent.getExtras().getBoolean("stop");
+        if (intent.getExtras().getBoolean("next"))
+            currentPosition = 0;
         if(isPlaying){
             Log.i("테스트","음악 실행");
             playMusic(list.get(position));
@@ -67,12 +68,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
             Log.i("테스트","음악 일시 중지");
             pause();
         }
-        if(stop){
-            Log.i("테스트","음악 정지");
-            mediaPlayer.stop();
-            mediaPlayer = null;
-        }
-
 
         return START_NOT_STICKY;
     }
@@ -94,6 +89,20 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         intent.putExtra("currentPosition", currentPosition);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    while(isPlaying) {
+                        intent.putExtra("currentPosition", mediaPlayer.getCurrentPosition());
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                        Thread.sleep(1000);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
 
