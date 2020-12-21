@@ -83,4 +83,4 @@ public class MusicData implements Serializable {
                 ", albumArt='"+albumArt+'\'';
     }
 }
-}
+

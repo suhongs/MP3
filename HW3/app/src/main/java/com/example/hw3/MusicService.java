@@ -24,7 +24,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     private String mPath;
     private ArrayList<MusicData> list;
 
-    int currentPosition=0;
+    int currentPosition=0, position = 0;
     boolean isPlaying;
     Context context;
     @Override
@@ -56,10 +56,10 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         Log.i("테스트", list.toString());
 
         isPlaying = Objects.requireNonNull(intent.getExtras()).getBoolean("playing");
-
+        position = intent.getExtras().getInt("position");
         if(isPlaying){
             Log.i("테스트","음악 실행");
-            playMusic(list.get(1));
+            playMusic(list.get(position));
         }
         else{
             Log.i("테스트","음악 일시 중지");

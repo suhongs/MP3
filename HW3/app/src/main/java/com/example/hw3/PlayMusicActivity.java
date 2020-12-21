@@ -22,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 
 public class PlayMusicActivity extends AppCompatActivity {
@@ -31,8 +32,7 @@ public class PlayMusicActivity extends AppCompatActivity {
 
     private Intent musicIntent;
     private ArrayList<MusicData> list;
-    private Messenger mServiceMessenger = null;
-    private boolean mIsBound;
+    private int position;
 
     private ImageView skipPreviousBtn, playBtn, skipNextBtn;
     private ProgressBar musicProgressBar;
@@ -99,12 +99,14 @@ public class PlayMusicActivity extends AppCompatActivity {
         init(); // 위젯 초기화
         Intent intent = getIntent();
         list = (ArrayList<MusicData>) intent.getSerializableExtra("playlist");
+        position = intent.getExtras().getInt("position");
 
-        musicTitle.setText(list.get(0).getTitle());
+        musicTitle.setText(URLDecoder.decode(list.get(position).getTitle()));
         Log.i("PlayMusicActivity 테스트", list.toString());
 
         musicIntent = new Intent(this, MusicService.class);
         musicIntent.putExtra("playlist", list);
+        musicIntent.putExtra("position",position);
     }
 
     @Override

@@ -80,7 +80,7 @@ public class MainActivity extends Activity{
         musicListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MainActivity.this, PlayingMusicActivity.class);
+                Intent intent = new Intent(MainActivity.this, PlayMusicActivity.class);
                 intent.putExtra("position", position);
                 intent.putExtra("playlist", list);
                 startActivity((intent));
