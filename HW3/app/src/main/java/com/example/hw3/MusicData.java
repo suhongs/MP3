@@ -8,17 +8,30 @@ public class MusicData implements Serializable {
     private String title;
     private String duration;
     private String path;
+    private String albumArt;
 
     public MusicData() {
     }
 
-    public MusicData(String id, String albumId, String title, String duration, String path) {
+    public MusicData(String id, String albumId, String title, String duration, String path, String albumArt) {
         this.id = id;
         this.albumId = albumId;
         this.title = title;
         this.duration = duration;
         this.path = path;
+        this.albumArt = albumArt;
     }
+
+    public String getAlbumArt()
+    {
+        return albumArt;
+    }
+
+    public void setAlbumArt(String albumArt)
+    {
+        this.albumArt = albumArt;
+    }
+
 
     public String getId() {
         return id;
@@ -67,6 +80,7 @@ public class MusicData implements Serializable {
                 ", title='" + title + '\'' +
                 ", duration='" + duration + '\'' +
                 ", path='" + path + '\'' +
-                '}';
+                ", albumArt='"+albumArt+'\'';
     }
+}
 }
