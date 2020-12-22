@@ -7,6 +7,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -14,20 +15,15 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.media.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +86,12 @@ public class MainActivity extends Activity {
             }
         });
 
+
+        if(!Contents.bigFlag){
+            Contents.bigFlag = true;
+            finish();
+        }
+
         createNotificationChannel();
     }
 
@@ -106,10 +108,8 @@ public class MainActivity extends Activity {
                 null);
 
         if (cursor != null) {
-            Log.i("시발거", Integer.toString(cursor.getCount()));
             while (cursor.moveToNext()) {
                 MusicData data = new MusicData();
-                Log.i("rktn", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
                 data.setId(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
                 data.setAlbumId(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
                 data.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
@@ -126,7 +126,7 @@ public class MainActivity extends Activity {
             // Create the NotificationChannel
             String name = getString(R.string.channel_name);
 
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            int importance = NotificationManager.IMPORTANCE_LOW;
             NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
 
             // Register the channel with the system; you can't change the importance

@@ -2,16 +2,11 @@ package com.example.hw3;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
-import android.os.Build;
 import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,8 +19,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.*;
-import android.app.Activity;
-import java.io.Serializable;
 
 public class MusicAdapter extends BaseAdapter{
 
@@ -61,7 +54,6 @@ public class MusicAdapter extends BaseAdapter{
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             convertView.setLayoutParams(layoutParams);
         }
-        Log.i("테스트",list.toString());
         ImageView imageView = (ImageView) convertView.findViewById(R.id.imgMusic);
         Bitmap albumImage = getAlbumImage(mContext, Integer.parseInt((list.get(position)).getAlbumId()), 170);
         imageView.setImageBitmap(albumImage);
@@ -75,7 +67,6 @@ public class MusicAdapter extends BaseAdapter{
     private  final BitmapFactory.Options options = new BitmapFactory.Options();
 
     private  Bitmap getAlbumImage(Context context, int album_id, int MAX_IMAGE_SIZE) {
-        Log.i("테스트",album_id+"");
         ContentResolver res = context.getContentResolver();
 
         Uri uri = Uri.parse("content://media/external/audio/albumart");
@@ -95,9 +86,6 @@ public class MusicAdapter extends BaseAdapter{
                 }
                 options.inJustDecodeBounds = false;
                 options.inSampleSize = scale;
-
-
-
                 Bitmap b = BitmapFactory.decodeFileDescriptor(
                         fd.getFileDescriptor(), null, options);
 
@@ -112,14 +100,11 @@ public class MusicAdapter extends BaseAdapter{
 
                 return b;
             } catch (FileNotFoundException e) {
-                System.out.println("찾지 못함");
             } finally {
                 try {
                     if (fd != null)
                         fd.close();
-                    System.out.println("??");
                 } catch (IOException e) {
-                    System.out.println("?????");
                 }
             }
         }

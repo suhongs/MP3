@@ -1,25 +1,17 @@
 package com.example.hw3;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.app.TaskStackBuilder;
+
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.RemoteViews;
 
-import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.util.ArrayList;
@@ -31,6 +23,8 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     private ArrayList<MusicData> list;
     public static final String ACTION_PLAY = "com.example.action.PLAY";
     public static final String ACTION_PAUSE = "com.example.action.PAUSE";
+    public static final String ACTION_NEXT = "com.example.action.NEXT";
+    public static final String ACTION_PREV = "com.example.action.PREV";
 
     int currentPosition = 0, position = 0;
     boolean isPlaying;
@@ -41,79 +35,91 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         return null;
     }
 
-
+    testBroadcast testBroadcast;
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i("서비스 테스트", "onCreate()");
+        testBroadcast = new testBroadcast();
         context = this;
         mediaPlayer = new MediaPlayer();
     }
 
     @Override
     public void onDestroy() {
-        Log.i("서비스 테스트", "onDestroy()");
         mediaPlayer.stop();
         removeNotification();
         isPlaying = false; // 스레드 중지
         super.onDestroy();
     }
 
-    boolean next;
-
+    boolean flag = true;
     // 액티비티에서 데이터 받음
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        list = (ArrayList<MusicData>) intent.getSerializableExtra("playlist");
-        Log.i("테스트", list.toString());
+         this.intent = intent;
+        if(!intent.getExtras().getBoolean("broad")) {
+            list = (ArrayList<MusicData>) intent.getSerializableExtra("playlist");
+        }
 
-        this.intent = intent;
-        position = intent.getExtras().getInt("position");
-        if (intent.getExtras().getBoolean("next"))
-            currentPosition = 0;
+        if(flag) {
+            position = Objects.requireNonNull(intent.getExtras()).getInt("position");
+            flag = false;
+        }
         if (intent.getAction().equals((ACTION_PLAY))) {
-            Log.i("테스트", "음악 시작");
             if (currentPosition == 0)
                 playMusic(list.get(position));
             else {
-                Log.i("테스트", "음악 재시작");
                 resume();
             }
             isPlaying = true;
-        } else {
-            Log.i("테스트", "음악 일시 중지");
+        }
+        else if(intent.getAction().equals(ACTION_PAUSE)){
             isPlaying = false;
             pause();
         }
-
+        else if(intent.getAction().equals(ACTION_NEXT)) {
+            if(isPlaying) {
+                isPlaying = false;
+                pause();
+                currentPosition = 0;
+            }
+            this.position++;
+            if(this.position == list.size())
+                this.position = 0;
+            playMusic(list.get(position));
+            isPlaying = true;
+        }
+        else if(intent.getAction().equals(ACTION_PREV)) {
+            if(isPlaying) {
+                isPlaying = false;
+                pause();
+                currentPosition = 0;
+            }
+            this.position--;
+            if(position == -1)
+                position += list.size();
+            playMusic(list.get(position));
+            isPlaying = true;
+        }
         return START_NOT_STICKY;
     }
 
     @Override
-    public void onPrepared(MediaPlayer mediaPlayer) { // Prepare 단계가 완료되었을 때 호출될 함수를 재정의한다
+    public void onPrepared(MediaPlayer mediaPlayer) {
         mediaPlayer.start();
-
-        // 맨 처음 음악 실행할 때만 이 함수 실행 됨.
-        Log.i("테스트", "크흠흠");
-        intent = new Intent("custom-event-name");
-        intent.putExtra("duration", mediaPlayer.getDuration());
-        intent.putExtra("currentPosition", currentPosition);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-
         sendMessage();
         createNotification();
     }
 
-
     Intent intent;
-
     private void sendMessage() {
-        Log.d("테스트", mediaPlayer.getDuration() + "");
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     while (isPlaying) {
+                        intent = new Intent("custom-event-name");
+                        intent.putExtra("duration", mediaPlayer.getDuration());
                         intent.putExtra("currentPosition", mediaPlayer.getCurrentPosition());
                         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                         Thread.sleep(1000);
@@ -125,7 +131,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         }).start();
     }
 
-
     public void playMusic(MusicData musicDto) {
         mediaPlayer = new MediaPlayer();
         try {
@@ -135,7 +140,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
             mediaPlayer.setOnPreparedListener(this);
             mediaPlayer.prepareAsync();
         } catch (Exception e) {
-            Log.e("테스트", e.getMessage());
         }
     }
 
@@ -151,6 +155,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         if (mediaPlayer != null) {
             mediaPlayer.seekTo(currentPosition);
             mediaPlayer.start();
+            isPlaying = true;
             sendMessage();
             updataNortification();
         }
@@ -159,16 +164,44 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     private RemoteViews remoteView;
 
     public void updataNortification() {
-        Log.i("intent",intent.getAction());
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MainActivity.CHANNEL_ID)
                 .setContent(remoteView);
+
         if (intent.getAction().equals(ACTION_PLAY)) {
             builder.setSmallIcon(R.drawable.ic_baseline_play_arrow_24);
             remoteView.setImageViewResource(R.id.notification_play_btn, R.drawable.ic_baseline_pause_24);
+
+            actionTogglePlay = new Intent(this, testBroadcast.class);
+            actionTogglePlay.setAction(ACTION_PAUSE);
+            PendingIntent togglePlay = PendingIntent.getBroadcast(this, 0, actionTogglePlay,0);
+            remoteView.setOnClickPendingIntent(R.id.notification_play_btn, togglePlay);
         }
         else if (intent.getAction().equals(ACTION_PAUSE)) {
             builder.setSmallIcon(R.drawable.ic_baseline_pause_24);
             remoteView.setImageViewResource(R.id.notification_play_btn, R.drawable.ic_baseline_play_arrow_24);
+
+            actionTogglePlay = new Intent(this, testBroadcast.class);
+            actionTogglePlay.setAction(ACTION_PLAY);
+            PendingIntent togglePlay = PendingIntent.getBroadcast(this, 0, actionTogglePlay,0);
+            remoteView.setOnClickPendingIntent(R.id.notification_play_btn, togglePlay);
+        }
+        else if(intent.getAction().equals(ACTION_NEXT)) {
+            builder.setSmallIcon(R.drawable.ic_baseline_play_arrow_24);
+            remoteView.setImageViewResource(R.id.notification_play_btn, R.drawable.ic_baseline_pause_24);
+
+            actionTogglePlay = new Intent(this, testBroadcast.class);
+            actionTogglePlay.setAction(ACTION_PAUSE);
+            PendingIntent togglePlay = PendingIntent.getBroadcast(this, 0, actionTogglePlay,0);
+            remoteView.setOnClickPendingIntent(R.id.notification_play_btn, togglePlay);
+        }
+        else if(intent.getAction().equals(ACTION_PREV)) {
+            builder.setSmallIcon(R.drawable.ic_baseline_play_arrow_24);
+            remoteView.setImageViewResource(R.id.notification_play_btn, R.drawable.ic_baseline_pause_24);
+
+            actionTogglePlay = new Intent(this, testBroadcast.class);
+            actionTogglePlay.setAction(ACTION_PAUSE);
+            PendingIntent togglePlay = PendingIntent.getBroadcast(this, 0, actionTogglePlay,0);
+            remoteView.setOnClickPendingIntent(R.id.notification_play_btn, togglePlay);
         }
 
 
@@ -176,11 +209,39 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         notificationManager.notify(0, builder.build());
     }
 
+    Intent actionTogglePlay;
+    Intent actionToggleNext;
+    Intent actionTogglePrev;
+    Intent actionImage;
+
     public void createNotification() {
         remoteView = new RemoteViews(getPackageName(), R.layout.custom_notification);
 
+        actionTogglePlay = new Intent(this, testBroadcast.class);
+        actionToggleNext = new Intent(this, testBroadcast.class);
+        actionTogglePrev = new Intent(this, testBroadcast.class);
+        actionImage = new Intent(this, PlayMusicActivity.class);
+        actionImage.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        actionImage.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        remoteView.setTextViewText(R.id.notification_music_title, "제발 나와라아~~");
+        if(Contents.bigFlag)
+            Contents.bigFlag = false;
+
+        actionTogglePrev.setAction(ACTION_PREV);
+        actionToggleNext.setAction(ACTION_NEXT);
+        actionTogglePlay.setAction(ACTION_PAUSE);
+
+        PendingIntent toggleNext = PendingIntent.getBroadcast(this, 0, actionToggleNext, 0);
+        PendingIntent togglePlay = PendingIntent.getBroadcast(this, 0, actionTogglePlay,0);
+        PendingIntent togglePrev = PendingIntent.getBroadcast(this, 0, actionTogglePrev, 0);
+        PendingIntent image = PendingIntent.getActivities(this, 0, new Intent[]{actionImage}, 0);
+
+        remoteView.setOnClickPendingIntent(R.id.notification_play_btn, togglePlay);
+        remoteView.setOnClickPendingIntent(R.id.notification_skip_next_btn, toggleNext);
+        remoteView.setOnClickPendingIntent(R.id.notification_skip_previous_btn, togglePrev);
+        remoteView.setOnClickPendingIntent(R.id.notification_music_image, image);
+
+        remoteView.setTextViewText(R.id.notification_music_title, list.get(position).getTitle());
         remoteView.setImageViewResource(R.id.notification_music_image, R.drawable.ic_launcher_background);
         remoteView.setImageViewResource(R.id.notification_skip_previous_btn, R.drawable.ic_baseline_skip_previous_24);
 
@@ -192,7 +253,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MainActivity.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
                 .setContent(remoteView);
-
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(0, builder.build());
