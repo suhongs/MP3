@@ -21,6 +21,7 @@ public class NotificationPlayer {
     private NotificationManagerBuilder mNotificationManagerBuilder;
     private boolean isForeground;
 
+
     public NotificationPlayer(MusicService service, String channel_id) {
         mService = service;
         this.channel_id = channel_id;
@@ -67,11 +68,9 @@ public class NotificationPlayer {
             mRemoteViews = createRemoteView();
 
             mNotificationBuilder = new NotificationCompat.Builder(mService, this.channel_id);
-            mNotificationBuilder.setContentTitle("제목제목")
-                    .setOngoing(true)
+            mNotificationBuilder//.setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
+                    .setContentTitle("제목제목")
                     .setContentText("test")
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-//                    .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                     .setContent(mRemoteViews);
             Notification notification = mNotificationBuilder.build();
 
@@ -79,7 +78,7 @@ public class NotificationPlayer {
             notification.contentIntent = mMainPendingIntent;
             if (!isForeground) {
                 isForeground = true;
-                Log.i("서비스",this.channel_id + ", "  + mService.toString() + ", " + R.layout.custom_notification);
+                Log.i("서비스",this.channel_id + ", "  + mService.toString() + ", " + mRemoteViews);
                 // 서비스를 Foreground 상태로 만든다
                 notification.contentView = mRemoteViews;
                 this.mService.startForeground(NOTIFICATION_PLAYER_ID, notification);
@@ -88,7 +87,7 @@ public class NotificationPlayer {
 
         @Override
         protected Notification doInBackground(Void... params) {
-            mNotificationBuilder.setContent(mRemoteViews);
+            //mNotificationBuilder.setContent(mRemoteViews);
             mNotificationBuilder.setContentIntent(mMainPendingIntent);
             mNotificationBuilder.setPriority(Notification.PRIORITY_MAX);
             Notification notification = mNotificationBuilder.build();
@@ -137,22 +136,5 @@ public class NotificationPlayer {
 //            Uri albumArtUri = ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"), mService.getAudioItem().mAlbumId);
 //            Picasso.with(mService).load(albumArtUri).error(R.drawable.empty_albumart).into(remoteViews, R.id.img_albumart, NOTIFICATION_PLAYER_ID, notification);
         }
-
     }
-//    private static final String CHANNEL_ID = "음악채널";
-//    private void createNotificationChannel() {
-//        // Create the NotificationChannel, but only on API 26+ because
-//        // the NotificationChannel class is new and not in the support library
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            CharSequence name = getString(R.string.channel_name);
-////            String description = getString(R.string.channel_description);
-//            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-//            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-////            channel.setDescription(description);
-//            // Register the channel with the system; you can't change the importance
-//            // or other notification behaviors after this
-//            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-//            notificationManager.createNotificationChannel(channel);
-//        }
-//    }
 }

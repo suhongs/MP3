@@ -26,8 +26,6 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 
 public class PlayMusicActivity extends AppCompatActivity {
-    private static final String ACTION_PLAY = "PLAY";
-    private static final String ACTION_PAUSE = "PAUSE";
     private boolean isPlaying = false;
 
     private Intent musicIntent;
@@ -37,6 +35,12 @@ public class PlayMusicActivity extends AppCompatActivity {
     private ImageView skipPreviousBtn, playBtn, skipNextBtn;
     private ProgressBar musicProgressBar;
     private TextView musicTitle, musicPlayingText, musicFinishText;
+
+    public static String MAIN_ACTION = "com.example.foregroundservice.action.main";
+    public static String PLAY_ACTION = "com.example.foregroundservice.play.main";
+    public static String NEXTPLAY_ACTION = "com.example.foregroundservice.action.nextplay";
+    public static String STARTFOREGROUND_ACTION = "com.example.foregroundservice.action.startforeground";
+    public static String STOPFOREGROUND_ACTION = "com.example.foregroundservice.action.stopforeground";
 
     private int duration, currentPosition;
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
@@ -109,44 +113,43 @@ public class PlayMusicActivity extends AppCompatActivity {
     public void onClick(View v) throws InterruptedException {
         switch (v.getId()) {
             case R.id.play_btn:
-                if (isPlaying) { // 음악 재생
-//                    musicIntent.putExtra("position",);
-                    musicIntent.putExtra("playing",false);
-                    // 이미지 변경
-                    playBtn.setImageResource(R.drawable.ic_baseline_play_arrow_24);
-                    isPlaying = false;
-                }else{ // 일시 정지
-                    musicIntent.putExtra("playing",true);
-//                    startService(musicIntent);
-
+                if (isPlaying == false) { // 음악 재생
+                    musicIntent.setAction(MusicService.ACTION_PLAY);
                     // 이미지 변경
                     playBtn.setImageResource(R.drawable.ic_baseline_pause_24);
                     isPlaying = true;
+                }else{ // 일시 정지
+                    musicIntent.setAction(MusicService.ACTION_PAUSE);
+//                    startService(musicIntent);
+
+                    // 이미지 변경
+                    playBtn.setImageResource(R.drawable.ic_baseline_play_arrow_24);
+                    isPlaying = false;
                 }
                 break;
             case R.id.skip_next_btn:
                 musicIntent.putExtra("next",true);
-                musicIntent.putExtra("playing", false);
+                musicIntent.setAction(MusicService.ACTION_PAUSE);
                 startService(musicIntent);
                 position+=1;
                 if(position == list.size())
                     position = 0;
                 musicIntent.putExtra("position", position);
-                musicIntent.putExtra("playing", true);
+                musicIntent.setAction(MusicService.ACTION_PLAY);
                 updateUI(position);
                 playBtn.setImageResource(R.drawable.ic_baseline_pause_24);
                 isPlaying = true;
                 break;
             case R.id.skip_previous_btn:
                 musicIntent.putExtra("next",true);
-                musicIntent.putExtra("playing", false);
+                musicIntent.setAction(MusicService.ACTION_PAUSE);
                 startService(musicIntent);
                 Log.i("list" , Integer.toString(list.size()));
                 position -= 1;
                 if(position == -1)
                     position += list.size();
                 musicIntent.putExtra("position", position);
-                musicIntent.putExtra("playing", true);
+                musicIntent.setAction(MusicService.ACTION_PLAY);
                 updateUI(position);
                 playBtn.setImageResource(R.drawable.ic_baseline_pause_24);
                 isPlaying = true;
