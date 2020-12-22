@@ -17,6 +17,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -70,7 +71,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         list = (ArrayList<MusicData>) intent.getSerializableExtra("playlist");
         Log.i("테스트", list.toString());
 
-        mNotificationPlayer = new NotificationPlayer(this, MainActivity.CHANNEL_ID);
+//        mNotificationPlayer = new NotificationPlayer(this, MainActivity.CHANNEL_ID);
 
         position = intent.getExtras().getInt("position");
         if (intent.getExtras().getBoolean("next"))
@@ -95,6 +96,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     public void onPrepared(MediaPlayer mediaPlayer) { // Prepare 단계가 완료되었을 때 호출될 함수를 재정의한다
         mediaPlayer.start();
         sendMessage();
+        createNotification();
     }
 
 
@@ -143,14 +145,14 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         if (mediaPlayer != null){
             mediaPlayer.pause();
             currentPosition=mediaPlayer.getCurrentPosition();
-            updateNotificationPlayer();
+//            updateNotificationPlayer();
         }
     }
     public void resume(){
         if (mediaPlayer != null){
             mediaPlayer.seekTo(currentPosition);
             mediaPlayer.start();
-            updateNotificationPlayer();
+//            updateNotificationPlayer();
         }
     }
 
@@ -158,6 +160,36 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         if (mNotificationPlayer != null) {
             mNotificationPlayer.updateNotificationPlayer();
         }
+    }
+
+    public void createNotification(){
+        RemoteViews remoteView = new RemoteViews(getPackageName(), R.layout.custom_notification);
+
+        RemoteViews collapsedView = new RemoteViews(getPackageName(),
+                R.layout.notification_collapsed);
+        RemoteViews expandedView = new RemoteViews(getPackageName(),
+                R.layout.notification_expanded);
+
+        collapsedView.setTextViewText(R.id.text_view_collapsed_1, "Hello World!");
+
+
+        remoteView.setTextViewText(R.id.notification_music_title   ,"제발 나와라~");
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MainActivity.CHANNEL_ID)
+
+                .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
+                .setCustomContentView(collapsedView)
+                .setCustomBigContentView(remoteView);
+
+//                .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
+//                .setContent(remoteView);
+//                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+//                .setCustomContentView(remoteView);
+//                .setCustomBigContentView(remoteView);
+
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(0,builder.build());
+
     }
 
 }

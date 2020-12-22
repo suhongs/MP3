@@ -32,9 +32,9 @@ import android.media.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends Activity{
+public class MainActivity extends Activity {
 
-    String[] permissions = { "android.permission.READ_EXTERNAL_STORAGE","android.permission.FOREGROUND_SERVICE"};
+    String[] permissions = {"android.permission.READ_EXTERNAL_STORAGE", "android.permission.FOREGROUND_SERVICE"};
     private String TAG = "MainActivity";
     private ListView musicListView;
     private MusicAdapter adapter;
@@ -47,18 +47,18 @@ public class MainActivity extends Activity{
         super.onDestroy();
     }
 
-    private boolean checkPermissions(){
+    private boolean checkPermissions() {
         int result;
 
         List<String> permissionList = new ArrayList<>();
-        for(String pm: permissions){
+        for (String pm : permissions) {
             result = ContextCompat.checkSelfPermission(this, pm);
-            if(result != PackageManager.PERMISSION_GRANTED){
+            if (result != PackageManager.PERMISSION_GRANTED) {
                 permissionList.add(pm);
             }
         }
-        if(!permissionList.isEmpty()){
-            ActivityCompat.requestPermissions(this,permissionList.toArray(new String[permissionList.size()]), 101);
+        if (!permissionList.isEmpty()) {
+            ActivityCompat.requestPermissions(this, permissionList.toArray(new String[permissionList.size()]), 101);
             return false;
         }
 
@@ -67,17 +67,16 @@ public class MainActivity extends Activity{
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        createNotificationChannel();
-        if(Build.VERSION.SDK_INT >= 23)
+        if (Build.VERSION.SDK_INT >= 23)
             checkPermissions();
 
-        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, 101);
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getMusicData();
-        musicListView = (ListView)findViewById(R.id.listView);
+        musicListView = (ListView) findViewById(R.id.listView);
         adapter = new MusicAdapter(this, list);
         musicListView.setAdapter(adapter);
 
@@ -90,11 +89,13 @@ public class MainActivity extends Activity{
                 startActivity((intent));
             }
         });
+
+        createNotificationChannel();
     }
 
-    private void getMusicData(){
-        String[] projection = {MediaStore.Audio.Media.ALBUM_ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media._ID,  MediaStore.Audio.Media.DURATION,
-                MediaStore.Audio.AudioColumns.DATA,MediaStore.Audio.Media.ARTIST};
+    private void getMusicData() {
+        String[] projection = {MediaStore.Audio.Media.ALBUM_ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media._ID, MediaStore.Audio.Media.DURATION,
+                MediaStore.Audio.AudioColumns.DATA, MediaStore.Audio.Media.ARTIST};
 
         ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(
@@ -104,9 +105,9 @@ public class MainActivity extends Activity{
                 null,
                 null);
 
-        if(cursor != null) {
+        if (cursor != null) {
             Log.i("시발거", Integer.toString(cursor.getCount()));
-            while (cursor.moveToNext() ) {
+            while (cursor.moveToNext()) {
                 MusicData data = new MusicData();
                 Log.i("rktn", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
                 data.setId(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
@@ -119,19 +120,20 @@ public class MainActivity extends Activity{
             }
         }
     }
+
     private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.channel_name);
-//            String description = getString(R.string.channel_description);
+            // Create the NotificationChannel
+            String name = getString(R.string.channel_name);
+
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-//            channel.setDescription(description);
+            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.createNotificationChannel(channel);
+            notificationManager.createNotificationChannel(mChannel);
         }
+
     }
 }
