@@ -14,6 +14,7 @@
         android:textAlignment="center"
         android:textColor="#FFF" />
     <ImageView
+        style="@style/TextAppearance.Compat.Notification.Info"
         android:id="@+id/image_view_expanded"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

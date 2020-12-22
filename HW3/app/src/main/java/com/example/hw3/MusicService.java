@@ -170,15 +170,14 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         RemoteViews expandedView = new RemoteViews(getPackageName(),
                 R.layout.notification_expanded);
 
-        collapsedView.setTextViewText(R.id.text_view_collapsed_1, "Hello World!");
 
+        remoteView.setTextViewText(R.id.notification_music_title,"제발 나와라아~~");
 
-        remoteView.setTextViewText(R.id.notification_music_title   ,"제발 나와라~");
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MainActivity.CHANNEL_ID)
-
                 .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
-                .setCustomContentView(collapsedView)
-                .setCustomBigContentView(remoteView);
+                .setContent(remoteView);
+//                .setCustomContentView(collapsedView)
+//                .setCustomBigContentView(expandedView);
 
 //                .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
 //                .setContent(remoteView);
