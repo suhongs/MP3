@@ -163,4 +163,9 @@ public class PlayMusicActivity extends AppCompatActivity {
         musicTitle.setText(URLDecoder.decode(list.get(position).getTitle()));
     }
 
+    @Override
+    protected void onDestroy() {
+        stopService(musicIntent);
+        super.onDestroy();
+    }
 }
