@@ -165,25 +165,18 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     public void createNotification(){
         RemoteViews remoteView = new RemoteViews(getPackageName(), R.layout.custom_notification);
 
-        RemoteViews collapsedView = new RemoteViews(getPackageName(),
-                R.layout.notification_collapsed);
-        RemoteViews expandedView = new RemoteViews(getPackageName(),
-                R.layout.notification_expanded);
-
 
         remoteView.setTextViewText(R.id.notification_music_title,"제발 나와라아~~");
+        remoteView.setImageViewResource(R.id.notification_music_image, R.drawable.ic_launcher_background);
+        remoteView.setImageViewResource(R.id.notification_skip_previous_btn, R.drawable.ic_baseline_skip_previous_24);
+        remoteView.setImageViewResource(R.id.notification_play_btn, R.drawable.ic_baseline_play_arrow_24);
+        remoteView.setImageViewResource(R.id.notification_skip_next_btn, R.drawable.ic_baseline_skip_next_24);
+
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MainActivity.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
                 .setContent(remoteView);
-//                .setCustomContentView(collapsedView)
-//                .setCustomBigContentView(expandedView);
 
-//                .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
-//                .setContent(remoteView);
-//                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-//                .setCustomContentView(remoteView);
-//                .setCustomBigContentView(remoteView);
 
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
